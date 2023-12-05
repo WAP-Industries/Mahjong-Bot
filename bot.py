@@ -22,7 +22,9 @@ class Bot:
             "n": "North",
             "wh": "White",
             "g": "Green",
-            "r": "Red"
+            "r": "Red",
+            "a": "Animal",
+            "f": "Flower"
         }
     }
 
@@ -93,7 +95,7 @@ class Bot:
                         "content": '\n'.join([
                                 "I am playing chinese mahjong, and this is my hand:",
                                 '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
-                                "What is the best possible move?",
+                                "How should I play?",
                             ]),
                     }
                 ],

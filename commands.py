@@ -9,6 +9,8 @@ def PrintLastHand():
 
 @Bot.Bot.command()
 async def exit(ctx):
+    if not await CheckSession(): 
+        return
     await ctx.send("Bye nigger")
     await Bot.Bot.close()
 
@@ -23,8 +25,8 @@ async def notation(ctx):
     header = f"{'Suit':<{sep}}Notation"
     Text = f"{header}\n{''.join(['-' for _ in range(len(header))])}\n"
     
-    Keys = [j for i in Bot.Notation.values() for j in i.keys()]
-    Text+=''.join([f"{Keys[i]:<{sep}}{i}\n" for i in Keys])
+    Keys = [j for i in Bot.Notation.values() for j in i]
+    Text+=''.join([f"{Bot.Notation['Number' if i in Bot.Notation['Number'] else 'Honor'][i]:<{sep}}{i}\n" for i in Keys])
     await Bot.Message(Text)
 
 
@@ -78,4 +80,4 @@ async def discard(ctx, tile):
 async def play(ctx):
     if not await CheckSession():
         return
-    await Bot.Message(await Bot.GetPlay())
+    await Bot.Message(f"{PrintLastHand()}\n\n\n{await Bot.GetPlay()}")
