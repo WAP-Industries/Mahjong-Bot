@@ -25,9 +25,6 @@ class Bot:
             "r": "Red"
         }
     }
-    Tiles = {
-        "Numbered": [""]
-    }
 
     class Game:
         InSession = LastHand = None
