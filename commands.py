@@ -1,5 +1,12 @@
 from bot import *
 
+async def CheckSession():
+    return (await Bot.Error("Game not in session yet, use !start to start new session") if not Bot.Game.InSession else True)
+
+def PrintLastHand():
+    return f"Current hand: {Bot.Game.LastHand}"
+
+
 @Bot.Bot.command()
 async def exit(ctx):
     await ctx.send("Bye nigger")
@@ -15,9 +22,9 @@ async def notation(ctx):
     sep = 15
     header = f"{'Suit':<{sep}}Notation"
     Text = f"{header}\n{''.join(['-' for _ in range(len(header))])}\n"
-    for i in Bot.Notation:
-        for j in Bot.Notation[i]:
-            Text+= f"{Bot.Notation[i][j]:<{sep}}{j}\n"
+    
+    Keys = [j for i in Bot.Notation.values() for j in i.keys()]
+    Text+=''.join([f"{Keys[i]:<{sep}}{i}\n" for i in Keys])
     await Bot.Message(Text)
 
 
@@ -35,24 +42,24 @@ async def start(ctx, tiles):
         return
     Bot.Game.LastHand = ','.join(Bot.GetTiles(tiles))
     Bot.Game.InSession = True
-    await Bot.Message("Session successfully started")
+    await Bot.Message(f"Session successfully started\n{PrintLastHand()}")
 
 @Bot.Bot.command()
 async def draw(ctx, tile):
-    if not Bot.Game.InSession:
-        return await Bot.Error("Game not in session yet, use !start to start new session")
+    if not await CheckSession(): 
+        return
     
     if not await Bot.ValidateTile(tile):
         return
     if len(Bot.GetTiles(Bot.Game.LastHand))>=14:
         return await Bot.Error("14 tiles already in hand, unable to draw")
     Bot.Game.LastHand+=f",{tile}"
-    await Bot.GetLastHand()
+    await Bot.Message(PrintLastHand())
 
 @Bot.Bot.command()
 async def discard(ctx, tile):
-    if not Bot.Game.InSession:
-        return await Bot.Error("Game not in session yet, use !start to start new session")
+    if not await CheckSession():
+        return
 
     if not await Bot.ValidateTile(tile):
         return
@@ -62,11 +69,13 @@ async def discard(ctx, tile):
     try:
         Tiles.remove(tile.strip())
         Bot.Game.LastHand = ','.join(Tiles)
-        await Bot.GetLastHand()
+        await Bot.Message(PrintLastHand())
     except:
         return await Bot.Error("Tile not in current hand", tile)
     
 
 @Bot.Bot.command()
 async def play(ctx):
-    pass
+    if not await CheckSession():
+        return
+    await Bot.Message(await Bot.GetPlay())

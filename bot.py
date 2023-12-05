@@ -1,10 +1,13 @@
 import nextcord
 from nextcord.ext import commands
+from openai import OpenAIError
+from openai import OpenAI
 import os
 
 class Bot:
     Directory = os.path.dirname(os.path.abspath(__file__))
     Bot = commands.Bot(intents=nextcord.Intents.all(), command_prefix="!")
+    GPT = None
     Context = None
     Notation={
         "Number": {
@@ -35,6 +38,7 @@ class Bot:
 
     @staticmethod
     def Run():
+        Bot.GPT = OpenAI(api_key=os.environ.get("OPENAI_KEY"))
         Bot.Bot.run(os.environ.get("BOT_KEY"))
 
     @staticmethod
@@ -45,11 +49,7 @@ class Bot:
     async def Error(message, tile=None):
         await Bot.Message(f"Error: {message}"+(f"\n\tat '{tile}'" if tile else ''))
         return False
-    
 
-    @staticmethod
-    async def GetLastHand():
-        await Bot.Message(f"Current hand: {Bot.Game.LastHand}")
     
     @staticmethod 
     def GetTiles(Hand):
@@ -75,7 +75,36 @@ class Bot:
     
     @staticmethod
     async def GetPlay():
-        pass
+        def OrganiseHand():
+            Hand = {} 
+
+            for i in Bot.GetTiles(Bot.Game.LastHand):
+                isNumber = i[0].isnumeric()
+                Key = i[1:] if isNumber else i
+                Char = Bot.Notation["Number"][Key] if isNumber else "Honor"
+                
+                Hand[Char] = [] if Char not in Hand.keys() else Hand[Char]
+                Hand[Char].append(i[0] if isNumber else Bot.Notation["Honor"][i])
+            return Hand
+        
+        Tiles = OrganiseHand()
+        try:
+            Response = Bot.GPT.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": '\n'.join([
+                                "I am playing chinese mahjong, and this is my hand:",
+                                '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
+                                "What is the best possible move?",
+                            ]),
+                    }
+                ],
+                model="gpt-3.5-turbo",
+            )
+            return Response.choices[0].message.content.strip()
+        except OpenAIError as e:
+            return f"Error: {e}"
 
 
     @Bot.event
@@ -88,18 +117,3 @@ class Bot:
         if message.author==Bot.Bot.user: return
         Bot.Context = message.channel
         await Bot.Bot.process_commands(message)
-
-
-
-# client = OpenAI(api_key=os.environ.get("OPENAI_KEY"))
-
-# chat_completion = client.chat.completions.create(
-#     messages=[
-#         {
-#             "role": "user",
-#             "content": "Say this is a test",
-#         }
-#     ],
-#     model="gpt-3.5-turbo",
-# )
-# print(chat_completion)
