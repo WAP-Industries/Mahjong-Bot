@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
-from openai import OpenAIError
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 import os
 
 class Bot:
