@@ -80,4 +80,6 @@ async def discard(ctx, tile):
 async def play(ctx):
     if not await CheckSession():
         return
+    if len(Bot.GetTiles(Bot.Game.LastHand))<14:
+        return await Bot.Error("Insufficient number of tiles to play")
     await ctx.send(f"```{PrintLastHand()}``````{await Bot.GetPlay()}```")

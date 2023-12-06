@@ -72,6 +72,23 @@ class Bot:
         return True
     
     @staticmethod
+    def GetResponse(user_input):
+        try:
+            Response = Bot.GPT.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": user_input
+                    }
+                ],
+                model="gpt-3.5-turbo",
+            )
+            return Response.choices[0].message.content.strip()
+        except OpenAIError as e:
+            return f"Error: {e}"
+
+    
+    @staticmethod
     async def GetPlay():
         def OrganiseHand():
             Hand = {} 
@@ -86,23 +103,14 @@ class Bot:
             return Hand
         
         Tiles = OrganiseHand()
-        try:
-            Response = Bot.GPT.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": '\n'.join([
-                                "I am playing chinese mahjong, and this is my hand:",
-                                '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
-                                "Without providing any explanation, recommend which tile I should discard, and list down the sets I should aim to form in point format.",
-                            ]),
-                    }
-                ],
-                model="gpt-3.5-turbo",
-            )
-            return Response.choices[0].message.content.strip()
-        except OpenAIError as e:
-            return f"Error: {e}"
+
+        return Bot.GetResponse('\n'.join([
+            "I am playing Chinese Mahjong and this is my hand:",
+            '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
+            "Without providing any explanation, suggest which tile I should discard, and what sets I should try to form, presenting your answer in the format: ",
+            "Discard: [Tile with suit and number]",
+            "Sets: [Sets in point form, tiles separated with commas]"
+        ]))
 
 
     @Bot.event
