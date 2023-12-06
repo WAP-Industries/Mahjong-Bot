@@ -109,11 +109,10 @@ class Bot:
             return {i:sorted(Hand[i]) for i in Hand}
         
         Tiles = OrganiseHand()
-        Tiles = '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles])
 
         return Bot.GetResponse('\n'.join([
             "I am playing Chinese Mahjong and this is my hand:",
-            Tiles,
+            '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
             "Without providing any explanation, suggest which tile I should discard, and what sets to aim for, presenting your answer in the format:",
             "Discard: [Tile with suit and number]",
             "Sets: [Sets listed in point form, tiles separated with commas]"
