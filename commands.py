@@ -9,8 +9,6 @@ def PrintLastHand():
 
 @Bot.Bot.command()
 async def exit(ctx):
-    if not await CheckSession(): 
-        return
     await ctx.send("Bye nigger")
     await Bot.Bot.close()
 
@@ -33,6 +31,8 @@ async def notation(ctx):
 
 @Bot.Bot.command()
 async def end(ctx):
+    if not await CheckSession():
+        return
     Bot.Game.Reset()
     await Bot.Message("Session ended")
 
@@ -43,6 +43,7 @@ async def start(ctx, tiles):
     if not await Bot.ValidateHand(tiles): 
         return
     Bot.Game.LastHand = ','.join(Bot.GetTiles(tiles))
+    Bot.SortHand()
     Bot.Game.InSession = True
     await Bot.Message(f"Session successfully started\n\n{PrintLastHand()}")
 
@@ -56,6 +57,7 @@ async def draw(ctx, tile):
     if len(Bot.GetTiles(Bot.Game.LastHand))>=14:
         return await Bot.Error("14 tiles already in hand, unable to draw")
     Bot.Game.LastHand+=f",{tile}"
+    Bot.SortHand()
     await Bot.Message(PrintLastHand())
 
 @Bot.Bot.command()
@@ -71,6 +73,7 @@ async def discard(ctx, tile):
     try:
         Tiles.remove(tile.strip())
         Bot.Game.LastHand = ','.join(Tiles)
+        Bot.SortHand()
         await Bot.Message(PrintLastHand())
     except:
         return await Bot.Error("Tile not in current hand", tile)

@@ -29,10 +29,12 @@ class Bot:
 
     class Game:
         InSession = LastHand = None
+        
         @staticmethod
         def Reset():
             Bot.Game.InSession = False
             Bot.Game.LastHand = None 
+        
 
     @staticmethod
     def Run():
@@ -47,11 +49,15 @@ class Bot:
     async def Error(message, tile=None):
         await Bot.Message(f"Error: {message}"+(f"\n\tat '{tile}'" if tile else ''))
         return False
-
+    
     
     @staticmethod 
     def GetTiles(Hand):
         return [i.strip() for i in Hand.split(",") if len(i.strip())]
+    
+    @staticmethod
+    def SortHand():
+        Bot.Game.LastHand = ','.join(sorted(Bot.GetTiles(Bot.Game.LastHand)))
     
     @staticmethod 
     async def ValidateTile(Tile):
@@ -100,16 +106,17 @@ class Bot:
                 
                 Hand[Char] = [] if Char not in Hand.keys() else Hand[Char]
                 Hand[Char].append(i[0] if isNumber else Bot.Notation["Honor"][i])
-            return Hand
+            return {i:sorted(Hand[i]) for i in Hand}
         
         Tiles = OrganiseHand()
+        Tiles = '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles])
 
         return Bot.GetResponse('\n'.join([
             "I am playing Chinese Mahjong and this is my hand:",
-            '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
-            "Without providing any explanation, suggest which tile I should discard, and what sets I should try to form, presenting your answer in the format: ",
+            Tiles,
+            "Without providing any explanation, suggest which tile I should discard, and what sets to aim for, presenting your answer in the format:",
             "Discard: [Tile with suit and number]",
-            "Sets: [Sets in point form, tiles separated with commas]"
+            "Sets: [Sets listed in point form, tiles separated with commas]"
         ]))
 
 
