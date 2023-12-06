@@ -90,13 +90,12 @@ async def chi(ctx, tile):
     if not await Bot.ValidateTile(tile):
         return
     if len(Bot.GetTiles(Bot.Game.LastHand))!=13: 
-        return await Bot.Error("trick ass bitch u cant claim shit (invalid number of tiles)")
+        return await Bot.Error("trick ass bitch u cant chi shit (invalid number of tiles)")
     Response = await Bot.GetMove([
         f"The last discarded tile was {GetTileRepr(tile.strip())}",
-        "The last discarded tile was Red tile.",
         "Is claiming the tile the best strategy? Without providing any explanation, present your answer in this format:",
         "Claim: [Yes/No]",
-        "Discard: [Tile to discard if yes]"
+        "(if claiming is the best strategy) Discard: [Tile (with suit and number) to discard from my hand]"
     ])
     await ctx.send(f"```{PrintLastHand()}``````{Response}```")
     
