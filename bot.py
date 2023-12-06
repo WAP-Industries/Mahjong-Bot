@@ -94,7 +94,7 @@ class Bot:
                         "content": '\n'.join([
                                 "I am playing chinese mahjong, and this is my hand:",
                                 '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
-                                "How should I play?",
+                                "Without providing any explanation, recommend which tile I should discard, and list down the sets I should aim to form in point format.",
                             ]),
                     }
                 ],

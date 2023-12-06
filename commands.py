@@ -4,7 +4,7 @@ async def CheckSession():
     return (await Bot.Error("Game not in session yet, use !start to start new session") if not Bot.Game.InSession else True)
 
 def PrintLastHand():
-    return f"Current hand: {Bot.Game.LastHand}"
+    return f"Current hand: {Bot.Game.LastHand}\nTiles: {len(Bot.GetTiles(Bot.Game.LastHand))}"
 
 
 @Bot.Bot.command()
@@ -44,7 +44,7 @@ async def start(ctx, tiles):
         return
     Bot.Game.LastHand = ','.join(Bot.GetTiles(tiles))
     Bot.Game.InSession = True
-    await Bot.Message(f"Session successfully started\n{PrintLastHand()}")
+    await Bot.Message(f"Session successfully started\n\n{PrintLastHand()}")
 
 @Bot.Bot.command()
 async def draw(ctx, tile):
@@ -80,4 +80,4 @@ async def discard(ctx, tile):
 async def play(ctx):
     if not await CheckSession():
         return
-    await Bot.Message(f"{PrintLastHand()}\n\n\n{await Bot.GetPlay()}")
+    await ctx.send(f"```{PrintLastHand()}``````{await Bot.GetPlay()}```")
