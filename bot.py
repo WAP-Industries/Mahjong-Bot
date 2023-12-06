@@ -19,9 +19,9 @@ class Bot:
             "s": "South",
             "w": "West",
             "n": "North",
-            "wh": "White",
-            "g": "Green",
-            "r": "Red",
+            "wh": "White Dragon",
+            "g": "Green Dragon",
+            "r": "Red Dragon",
             "a": "Animal",
             "f": "Flower"
         }
@@ -71,7 +71,7 @@ class Bot:
     @staticmethod
     async def ValidateHand(Hand):
         Tiles = Bot.GetTiles(Hand)
-        if len(Tiles)!=13: return await Bot.Error("Invalid number of tiles as starting hand")
+        if len(Tiles) not in [13, 14]: return await Bot.Error("Invalid number of tiles as starting hand")
         for i in Tiles:
             if not await Bot.ValidateTile(i):
                 return False
@@ -92,13 +92,11 @@ class Bot:
             return Response.choices[0].message.content.strip()
         except OpenAIError as e:
             return f"Error: {e}"
-
     
     @staticmethod
-    async def GetPlay():
+    async def GetMove(queries):
         def OrganiseHand():
             Hand = {} 
-
             for i in Bot.GetTiles(Bot.Game.LastHand):
                 isNumber = i[0].isnumeric()
                 Key = i[1:] if isNumber else i
@@ -107,15 +105,13 @@ class Bot:
                 Hand[Char] = [] if Char not in Hand.keys() else Hand[Char]
                 Hand[Char].append(i[0] if isNumber else Bot.Notation["Honor"][i])
             return {i:sorted(Hand[i]) for i in Hand}
-        
+
         Tiles = OrganiseHand()
 
         return Bot.GetResponse('\n'.join([
             "I am playing Chinese Mahjong and this is my hand:",
             '\n'.join([f'{i} Tiles: {",".join(Tiles[i])}' for i in Tiles]),
-            "Without providing any explanation, suggest which tile I should discard, and what sets to aim for, presenting your answer in the format:",
-            "Discard: [Tile with suit and number]",
-            "Sets: [Sets listed in point form, tiles separated with commas]"
+            *queries
         ]))
 
 

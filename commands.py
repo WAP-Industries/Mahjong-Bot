@@ -6,11 +6,17 @@ async def CheckSession():
 def PrintLastHand():
     return f"Current hand: {Bot.Game.LastHand}\nTiles: {len(Bot.GetTiles(Bot.Game.LastHand))}"
 
+def GetTileRepr(notation):
+    isNumber = notation[0].isnumeric()
+    Suit = Bot.Notation["Number" if isNumber else "Honor"][notation[1:] if isNumber else notation]
+    return (f"{notation[0]} of {Suit}s" if isNumber else Suit)+" Tile"
+
 
 @Bot.Bot.command()
 async def exit(ctx):
     await ctx.send("Bye nigger")
     await Bot.Bot.close()
+
 
 
 @Bot.Bot.command()
@@ -29,10 +35,14 @@ async def notation(ctx):
 
 
 
+def SessionCommand():
+    async def decorator(ctx, *args, **kwargs):
+        return (await Bot.Error("Game not in session yet, use !start to start new session") if not Bot.Game.InSession else True)
+    return commands.check(decorator)
+
 @Bot.Bot.command()
+@SessionCommand()
 async def end(ctx):
-    if not await CheckSession():
-        return
     Bot.Game.Reset()
     await Bot.Message("Session ended")
 
@@ -48,10 +58,8 @@ async def start(ctx, tiles):
     await Bot.Message(f"Session successfully started\n\n{PrintLastHand()}")
 
 @Bot.Bot.command()
-async def draw(ctx, tile):
-    if not await CheckSession(): 
-        return
-    
+@SessionCommand()
+async def claim(ctx, tile):
     if not await Bot.ValidateTile(tile):
         return
     if len(Bot.GetTiles(Bot.Game.LastHand))>=14:
@@ -61,10 +69,8 @@ async def draw(ctx, tile):
     await Bot.Message(PrintLastHand())
 
 @Bot.Bot.command()
-async def discard(ctx, tile):
-    if not await CheckSession():
-        return
-
+@SessionCommand()
+async def drop(ctx, tile):
     if not await Bot.ValidateTile(tile):
         return
     Tiles = Bot.GetTiles(Bot.Game.LastHand)
@@ -76,13 +82,33 @@ async def discard(ctx, tile):
         Bot.SortHand()
         await Bot.Message(PrintLastHand())
     except:
-        return await Bot.Error("Tile not in current hand", tile)
+        return await Bot.Error("Tile not in current hand", tile)   
+    
+@Bot.Bot.command()
+@SessionCommand()
+async def chi(ctx, tile):
+    if not await Bot.ValidateTile(tile):
+        return
+    if len(Bot.GetTiles(Bot.Game.LastHand))!=13: 
+        return await Bot.Error("trick ass bitch u cant claim shit (invalid number of tiles)")
+    Response = await Bot.GetMove([
+        f"The last discarded tile was {GetTileRepr(tile.strip())}",
+        "The last discarded tile was Red tile.",
+        "Is claiming the tile the best strategy? Without providing any explanation, present your answer in this format:",
+        "Claim: [Yes/No]",
+        "Discard: [Tile to discard if yes]"
+    ])
+    await ctx.send(f"```{PrintLastHand()}``````{Response}```")
     
 
 @Bot.Bot.command()
+@SessionCommand()
 async def play(ctx):
-    if not await CheckSession():
-        return
     if len(Bot.GetTiles(Bot.Game.LastHand))<14:
         return await Bot.Error("Insufficient number of tiles to play")
-    await ctx.send(f"```{PrintLastHand()}``````{await Bot.GetPlay()}```")
+    Response = await Bot.GetMove([
+        "Without providing any explanation, suggest which tile I should discard, and what sets to aim for, presenting your answer in the format:",
+        "Discard: [Tile with suit and number]",
+        "Sets: [Sets listed in point form, tiles separated with commas]"
+    ])
+    await ctx.send(f"```{PrintLastHand()}``````{Response}```")
