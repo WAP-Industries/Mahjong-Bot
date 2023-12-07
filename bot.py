@@ -99,8 +99,7 @@ class Bot:
             Hand = {} 
             for i in Bot.GetTiles(Bot.Game.LastHand):
                 isNumber = i[0].isnumeric()
-                Key = i[1:] if isNumber else i
-                Char = Bot.Notation["Number"][Key] if isNumber else "Honor"
+                Char = Bot.Notation["Number"][i[1:] if isNumber else i] if isNumber else "Honor"
                 
                 Hand[Char] = [] if Char not in Hand.keys() else Hand[Char]
                 Hand[Char].append(i[0] if isNumber else Bot.Notation["Honor"][i])
