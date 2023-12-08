@@ -114,13 +114,13 @@ class Bot:
         ]))
 
 
-    @Bot.event
-    async def on_ready():
-        Bot.Game.Reset()
-        print("Mahjong bot is running")
+@Bot.Bot.event
+async def on_ready():
+    Bot.Game.Reset()
+    print("Mahjong bot is running")
 
-    @Bot.event
-    async def on_message(message):
-        if message.author==Bot.Bot.user: return
-        Bot.Context = message.channel
-        await Bot.Bot.process_commands(message)
+@Bot.Bot.event
+async def on_message(message):
+    if message.author==Bot.Bot.user: return
+    Bot.Context = message.channel
+    await Bot.Bot.process_commands(message)
